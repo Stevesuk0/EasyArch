@@ -107,7 +107,7 @@ def Stage3():
         print("\n* Your system is not using UEFI as the boot mode. For better compatibility and features, especially with modern hardware, it's recommended to use UEFI.\n")
     else:
         print("\n* Your system is using UEFI as the boot mode. This is the recommended boot mode for modern systems, providing better compatibility, security features, and faster boot times.\n")
-    print("Continue in 3 secs...")
+    print("Continue in 2 secs...")
     time.sleep(3)
 
 
