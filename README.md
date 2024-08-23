@@ -11,6 +11,11 @@ EasyArch is a script designed to simplify the installation of Arch Linux with a 
 curl -sSL install.stevesukqwq.top/1 | bash
 ```
 
+*If you are in China, you can use this links.*
+```bash
+curl -sSL gitee.com/stevesuk0/EasyArch/raw/master/2 | bash
+```
+
 ## Features
 
 - **Mirror Configuration**: Choose to use a default mirror, configure manually, or add a custom mirror URL.
