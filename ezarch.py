@@ -5,7 +5,6 @@ import os
 import time
 import platform
 
-wizard = []
 bootefi = False
 kernel_type = ''
 disk = ''
