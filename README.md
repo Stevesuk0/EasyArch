@@ -11,7 +11,6 @@ EasyArch is a script designed to simplify the installation of Arch Linux with a 
 curl -sSL install.stevesukqwq.top/ezarch.py > 1 ; ./1
 ```
 
-
 ## Features
 
 - **Mirror Configuration**: Choose to use a default mirror, configure manually, or add a custom mirror URL.
@@ -20,4 +19,4 @@ curl -sSL install.stevesukqwq.top/ezarch.py > 1 ; ./1
 - **Formatting and Mounting**: Automatically formats and mounts partitions.
 - **System Configuration**: Sets hostname, installs and configures the base system, and optionally installs a desktop environment.
 
-
+![cae2c6d94741d3e7ec7205707426b4d8](https://github.com/user-attachments/assets/e6708bcc-96c1-4608-95ad-a9a2278e5cdc)
