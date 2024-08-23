@@ -1,9 +1,7 @@
 #!/usr/bin/python3
 
-
 import os
 import time
-import platform
 
 bootefi = False
 kernel_type = ''
@@ -238,7 +236,7 @@ def Stage12():
         ucode = 'amd-ucode'
     if "intel".lower() in get_cpu_architecture():
         ucode = 'intel-ucode'
-    os.system(f"pacstrap /mnt base pacman networkmanager vim sudo zsh zsh-completions grub efibootmgr os-prober fastfetch {ucode} {kernel_type} linux-firmware")
+    os.system(f"pacstrap /mnt base pacman networkmanager vim sudo zsh zsh-completions grub efibootmgr fastfetch {ucode} {kernel_type} linux-firmware")
 
 def Stage13():
     clear()
@@ -248,10 +246,12 @@ def Stage13():
     print("\nStep 1: Generating filesystem table...")
     os.makedirs('/mnt/etc', exist_ok=True)
     os.system('genfstab -U /mnt > /mnt/etc/fstab')
+    os.system('cat /mnt/etc/fstab')
     
     print("\nStep 2: Configuring host file...")
     with open('/mnt/etc/hosts', "w") as f:
         f.write("127.0.0.1 localhost\n::1 localhost")
+    os.system('cat /mnt/etc/hosts')
 
     print("\nStep 3: Installing bootloader...")
     run_command_chroot("grub-install --target=x86_64-efi --efi-directory=/boot")
@@ -262,9 +262,9 @@ def Stage13():
     for i in range(len(line)):
         if 'GRUB_CMDLINE_LINUX_DEFAULT' in line[i]:
             line[i] = "GRUB_CMDLINE_LINUX_DEFAULT=\"loglevel=5 ibt=off nowatchdog\""
-            line.append('GRUB_DISABLE_OS_PROBER=false')
     with open("/mnt/etc/default/grub", 'w') as f:
         f.writelines(line)
+    run_command_chroot("grub-mkconfig -o /boot/grub/grub.cfg")
 
     print("\nStep 5: Synchronizing hardware clock...")
     run_command_chroot("hwclock --systohc")
@@ -282,23 +282,32 @@ def Stage13():
     with open("/mnt/etc/pacman.d/mirrorlist", "w") as f:
         f.write(mirrorlist)
 
+    print("\nStep 8: Enable networking...")
+    run_command_chroot("systemctl start networkmanager")
+
+
     clear()
     print("Stage [13 / 13] - Setting user")
-    print("Stage [13 / 13] - Root Password Setup")
     print("Please choose a password for the root account. For security reasons, the password will be hidden.\n")
     run_command_chroot('passwd root')
     create_user = input("\nWould you like to create a new user account? (yes/no): ").strip().lower()
     if create_user == 'yes':
         username = input("Enter the username for the new account: ").strip()
-        run_command_chroot(f"useradd -m -G wheel -s /bin/bash {username}")
+        run_command_chroot(f"useradd -m -G wheel -s /bin/zsh {username}")
         print(f"Setting password for the user {username}...\n")
         run_command_chroot(f"passwd {username}")
         print(f"User {username} created and password set.\n")
+        print("Configuring sudoers file...")
+        with open("/mnt/etc/sudoers", 'r') as f:
+            line = f.read().split("\n")
+            for i in range(len(line)):
+                if '#%wheel ALL=(ALL:ALL) ALL' in line[i]:
+                    line[i] = "%wheel ALL=(ALL:ALL) ALL"
+            with open("/mnt/etc/sudoers", 'w') as f:
+                f.writelines(line)
         
-        print("Configuring sudoers file to allow members of the wheel group to use sudo...")
-        run_command_chroot("sed -i '/^# %wheel ALL=(ALL) ALL/s/^# //' /etc/sudoers")
         
-        print("Sudoers file updated.\n")
+        
 
     clear()
     print("Stage [13 / 13] - Desktop Environment Installation")
@@ -344,6 +353,11 @@ def Stage13():
             run_command_chroot("systemctl enable lightdm")
         else:
             print("Invalid selection. Skipping desktop environment installation.")
+        
+        if desktop_choice == '3':
+            run_command_chroot("pacman -Syu --noconfirm xdg-desktop-portal-kde")
+        else:
+            run_command_chroot("pacman -Syu --noconfirm xdg-desktop-portal")
         
         print("Desktop environment installation complete.\n")
 
