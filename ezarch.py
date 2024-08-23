@@ -283,7 +283,10 @@ def Stage13():
         f.write(mirrorlist)
 
     clear()
-    print("Stage [13 / 13] - Desktop Environment Installation")
+    print("Stage [13 / 13] - Setting user")
+    print("Stage [13 / 13] - Root Password Setup")
+    print("Please choose a password for the root account. For security reasons, the password will be hidden.\n")
+    run_command_chroot('passwd root')
     create_user = input("\nWould you like to create a new user account? (yes/no): ").strip().lower()
     if create_user == 'yes':
         username = input("Enter the username for the new account: ").strip()
@@ -346,9 +349,6 @@ def Stage13():
 
         
     clear()
-    print("Stage [13 / 13] - Root Password Setup")
-    print("Please choose a password for the root account. For security reasons, the password will be hidden.\n")
-    run_command_chroot('passwd root')
     print("\nSystem configuration completed. Installation is done!\n")
 
 
