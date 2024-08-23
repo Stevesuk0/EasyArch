@@ -34,7 +34,7 @@ def welcome():
     print("Press Ctrl + C to install manually.")
     try:
         input()
-    except keyboardInterrupt:
+    except KeyboardInterrupt:
         exit()
 
 def Stage1():
