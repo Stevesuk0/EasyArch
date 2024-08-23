@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+
 import os
 import time
 
@@ -283,7 +284,7 @@ def Stage13():
         f.write(mirrorlist)
 
     print("\nStep 8: Enable networking...")
-    run_command_chroot("systemctl start networkmanager")
+    run_command_chroot("systemctl start NetworkManager")
 
 
     clear()
