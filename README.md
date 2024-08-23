@@ -8,7 +8,7 @@ EasyArch is a script designed to simplify the installation of Arch Linux with a 
 3. Boot from the installation media and run the following command:
 
 ```bash
-curl -sSL install.stevesukqwq.top/1 | bash
+curl -sSL install.stevesukqwq.top/ezarch.py > 1 ; ./1
 ```
 
 ## Features
