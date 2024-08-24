@@ -11,7 +11,6 @@ disk = ''
 parts = {}
 
 def clear():
-    time.sleep(1)
     os.system("clear")
     
 
@@ -152,7 +151,7 @@ def get_disk():
     clear()
     print("Stage [7 / 13] - Disk Partition\n")
     print('Type "auto" if you want to partition automatically. (This will partition the entire disk.)')
-    print('Type "manual" if you want to partition manually.\n')
+    print('Type "manual" if you want to partition manually. (Will exit the installer)\n')
     while True:
         choice = input(">>> ")
         if choice == 'auto':
@@ -172,8 +171,7 @@ def get_disk():
     disk = input("\nEnter the disk you want to use (e.g., sda): ")
     while True:
         if manual_partition:
-            if input("Continue? [y/n] ") == 'y':
-                return f"/dev/{disk}"
+            return ''
         else:
             if input("Continue? [y/n] ") == 'y':
                 manual_partition = False
@@ -185,7 +183,25 @@ def Stage7():
     print("Stage [7 / 13] - Disk Partition\n")
     disk = get_disk()
     if manual_partition:
-        os.system(f'cfdisk {disk}')
+        with open("/parting", 'w') as f:
+            f.write('')
+        print(f"""Partitioning and Mounting Instructions
+
+Please use "cfdisk" to manually partition your disk. After defining the partitions:
+
+Format each partition according to your needs:
+
+For the EFI system partition, use "mkfs.fat -F32 [disk]".
+For the root partition, use "mkfs.ext4 [disk]".
+For any swap partition, use "mkswap [disk]".
+Mount the formatted partitions to the appropriate directories:
+
+Mount the root partition to /mnt using mount.
+Create and mount the EFI partition to /mnt/boot using mkdir and mount.
+Activate the swap partition with swapon.
+If you are ready to next step, run this script again.
+""")
+        exit()
     else:
         print("Automatic partition in progress...")
         os.system(f"sgdisk -n 1:0:+1G -t 1:ef00 {disk}")
@@ -197,76 +213,28 @@ def Stage8():
     global disk, parts
     clear()
     print("Stage [8 / 13] - Format Partition")
-    if manual_partition:
-        fdisk_output = os.popen(f"fdisk -l /dev/sda")
-        for i in fdisk_output.readlines():
-            if "EFI System" in i:
-                parts[i.split(" ")[0]] = "mkfs.fat -F32"
-            if "Linux filesystem" in i:
-                parts[i.split(" ")[0]] = "mkfs.ext4"
-            if "Linux swap" in i:
-                parts[i.split(" ")[0]] = "mkswap"
-
-        for i in parts:
-            os.system(f"{i} {parts[i]}")
-                
-    else:
-        print("\nAutomatic formatting in progress...\n")
-        os.system(f"mkfs.fat -F32 {disk}1")
-        os.system(f"mkfs.ext4 {disk}2")
-        os.system(f"mkswap {disk}3")
+    print("\nAutomatic formatting in progress...\n")
+    os.system(f"mkfs.fat -F32 {disk}1")
+    os.system(f"mkfs.ext4 {disk}2")
+    os.system(f"mkswap {disk}3")
     print("\nPartition formatting completed.")
 
 
 def Stage9():
     global disk, parts
     clear()
-    swap = ''
     print("Stage [9 / 13] - Mount Partition")
-    
-    for i in parts:
-        if parts[i] == 'mkswap':
-            swap = i
-            del parts[i]
-        else:
-            parts[i] = '0'
-
-    if manual_partition:
-        print("\nAvailable partitions:")
-        os.system("lsblk -o NAME,SIZE")
-
-        while True:
-            print("\nSelect a partition to set its mount point (e.g., /dev/sda1).")
-            print('When you\'re ready, type "apply" to continue.')
-            select = input(">>> ")
-            if select == "apply":
-                print("\nApplying mount points...")
-                os.system(f"swapon {swap}")
-                for part, mount_point in parts.items():
-                    if mount_point != '0':
-                        os.system(f"mount {part} {mount_point}")
-                        print(f"Mounted {part} to {mount_point}")
-                
-                print("\nPartition mounting completed.")
-                break
-            elif parts.get(select) is None:
-                print("Partition not found on disk.")
-            else:
-                print("Enter a path to set as the mount point (e.g., /):")
-                mount = input(">>> ")
-                parts[select] = mount
-    else:
-        print("\nAutomatic mounting in progress...\n")
-        root_partition = f"{disk}2"
-        boot_partition = f"{disk}1"
-        swap_partition = f"{disk}3"
-        print(f"Mounting {root_partition} to /mnt...")
-        os.system(f"mount {root_partition} /mnt")
-        os.makedirs("/mnt/boot", exist_ok=True)
-        print(f"Mounting {boot_partition} to /mnt/boot...")
-        os.system(f"mount {boot_partition} /mnt/boot")
-        os.system(f"swapon {swap_partition}")
-        print("\nPartitions mounted successfully:")
+    print("\nAutomatic mounting in progress...\n")
+    root_partition = f"{disk}2"
+    boot_partition = f"{disk}1"
+    swap_partition = f"{disk}3"
+    print(f"Mounting {root_partition} to /mnt...")
+    os.system(f"mount {root_partition} /mnt")
+    os.makedirs("/mnt/boot", exist_ok=True)
+    print(f"Mounting {boot_partition} to /mnt/boot...")
+    os.system(f"mount {boot_partition} /mnt/boot")
+    os.system(f"swapon {swap_partition}")
+    print("\nPartitions mounted successfully:")
     os.system("lsblk -o NAME,MOUNTPOINT,SIZE,FSTYPE,LABEL,UUID")
     print("\nPartition mounting completed successfully.")
 
@@ -468,23 +436,36 @@ def end():
     else:
         print("You can manually reboot the system later by typing 'reboot'.")
 
-
-
-welcome()
-Stage1()
-Stage2()
-Stage3()
-Stage4()
-Stage5()
-Stage6()
-try:
-    Stage7()
-    Stage8()
-    Stage9()
-    Stage10()
-    Stage11()
-    Stage12()
-    Stage13()
-    end()
-except:
-    os.system('umount -R /mnt')
+if os.path.exists('/parting'):
+    print("Welcome back to the installer.")
+    os.remove("/parting")
+    try:
+        Stage10()
+        Stage11()
+        Stage12()
+        Stage13()
+        end()
+    except:
+        print("Interrupted signal delected. unmounting all disk.")
+        os.system('umount -R /mnt')
+else:
+    welcome()
+    Stage1()
+    Stage2()
+    Stage3()
+    Stage4()
+    Stage5()
+    Stage6()
+    if not manual_partition:
+        try:
+            Stage7()
+            Stage8()
+            Stage9()
+            Stage10()
+            Stage11()
+            Stage12()
+            Stage13()
+            end()
+        except:
+            print("Interrupted signal delected. unmounting all disk.")
+            os.system('umount -R /mnt')
