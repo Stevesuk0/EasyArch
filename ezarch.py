@@ -76,7 +76,7 @@ def Stage1():
 
     for i in range(len(lines)):
         if '#ParallelDownloads = 5' in lines[i]:
-            lines[i] = "ParallelDownloads = 5\n" 
+            lines[i] = "ParallelDownloads = 10\n" 
     with open("/etc/pacman.conf", 'w') as f:
         f.writelines(lines)  
 
@@ -345,6 +345,16 @@ def Stage13():
 
     print("\nStep 8: Enable networking...")
     run_command_chroot("systemctl start NetworkManager")
+
+    print("\nStep 9: Enable pacman mulit-connection...")
+    with open("/mnt/etc/pacman.conf", 'r') as f:
+        lines = f.readlines()
+
+    for i in range(len(lines)):
+        if '#ParallelDownloads = 5' in lines[i]:
+            lines[i] = "ParallelDownloads = 10\n" 
+    with open("/mnt/etc/pacman.conf", 'w') as f:
+        f.writelines(lines)  
 
 
     clear()
