@@ -71,6 +71,15 @@ def Stage1():
         else:
             print("Invalid choice, please try again.")
 
+    with open("/mnt/etc/sudoers", 'r') as f:
+        line = f.read().split("\n")
+        for i in range(len(line)):
+            if '#ParallelDownloads = 5' in line[i]:
+                line[i] = "ParallelDownloads = 5"
+    with open("/mnt/etc/sudoers", 'w') as f:
+        f.writelines(line)
+
+
 
 def Stage2():
     clear()
@@ -353,8 +362,8 @@ def Stage13():
             for i in range(len(line)):
                 if '#%wheel ALL=(ALL:ALL) ALL' in line[i]:
                     line[i] = "%wheel ALL=(ALL:ALL) ALL"
-            with open("/mnt/etc/sudoers", 'w') as f:
-                f.writelines(line)
+        with open("/mnt/etc/sudoers", 'w') as f:
+            f.writelines(line)
         
         
         
@@ -364,23 +373,24 @@ def Stage13():
     install_desktop = input("\nWould you like to install a desktop environment? (yes/no): ").strip().lower()
     if install_desktop == 'yes':
         print("\nSelect a desktop environment:")
-        print("[1] GNOME (default)")
-        print("[2] KDE Plasma")
+        print("[1] KDE Plasma (default)")
+        print("[2] GNOME")
         print("[3] XFCE")
         print("[4] Cinnamon")
         print("[5] LXQt")
         print("[6] Mate")
         print("[7] Deepin")
+        
         desktop_choice = input(">>> ").strip()
 
-        if desktop_choice == '1' or desktop_choice == '':
-            print("Installing GNOME...")
-            run_command_chroot("pacman -Syu --noconfirm gnome gnome-extra")
-            run_command_chroot("systemctl enable gdm")
-        elif desktop_choice == '2':
+        if desktop_choice in ['1', '']:
             print("Installing KDE Plasma...")
             run_command_chroot("pacman -Syu --noconfirm plasma kde-applications")
             run_command_chroot("systemctl enable sddm")
+        elif desktop_choice == '2':
+            print("Installing GNOME...")
+            run_command_chroot("pacman -Syu --noconfirm gnome gnome-extra")
+            run_command_chroot("systemctl enable gdm")
         elif desktop_choice == '3':
             print("Installing XFCE...")
             run_command_chroot("pacman -Syu --noconfirm xfce4 xfce4-goodies")
@@ -403,13 +413,18 @@ def Stage13():
             run_command_chroot("systemctl enable lightdm")
         else:
             print("Invalid selection. Skipping desktop environment installation.")
-        
-        if desktop_choice == '3':
+            return
+
+        # Install xdg-desktop-portal and PipeWire components
+        if desktop_choice == '1':
             run_command_chroot("pacman -Syu --noconfirm xdg-desktop-portal-kde")
         else:
             run_command_chroot("pacman -Syu --noconfirm xdg-desktop-portal")
         
+        run_command_chroot("pacman -Syu --noconfirm pipewire pipewire-pulse")
+
         print("Desktop environment installation complete.\n")
+
 
         
     clear()
