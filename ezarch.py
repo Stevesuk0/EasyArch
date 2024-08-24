@@ -71,12 +71,12 @@ def Stage1():
         else:
             print("Invalid choice, please try again.")
 
-    with open("/mnt/etc/sudoers", 'r') as f:
+    with open("/etc/pacman.conf", 'r') as f:
         line = f.read().split("\n")
         for i in range(len(line)):
             if '#ParallelDownloads = 5' in line[i]:
                 line[i] = "ParallelDownloads = 5"
-    with open("/mnt/etc/sudoers", 'w') as f:
+    with open("/etc/pacman.conf", 'w') as f:
         f.writelines(line)
 
 
