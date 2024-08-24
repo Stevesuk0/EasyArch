@@ -11,8 +11,9 @@ disk = ''
 parts = {}
 
 def clear():
-    os.system("clear")
     time.sleep(1)
+    os.system("clear")
+    
     
 
 def run_command_chroot(command):
