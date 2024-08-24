@@ -408,24 +408,24 @@ def Stage13():
             run_command_chroot("systemctl enable gdm")
         elif desktop_choice == '3':
             print("Installing XFCE...")
-            run_command_chroot("pacman -Syu --noconfirm xfce4 xfce4-goodies lightdm")
-            run_command_chroot("systemctl enable lightdm")
+            run_command_chroot("pacman -Syu --noconfirm xfce4 xfce4-goodies gdm")
+            run_command_chroot("systemctl enable gdm")
         elif desktop_choice == '4':
             print("Installing Cinnamon...")
-            run_command_chroot("pacman -Syu --noconfirm cinnamon")
-            run_command_chroot("systemctl enable lightdm")
+            run_command_chroot("pacman -Syu --noconfirm cinnamon gdm")
+            run_command_chroot("systemctl enable gdm")
         elif desktop_choice == '5':
             print("Installing LXQt...")
             run_command_chroot("pacman -Syu --noconfirm lxqt")
             run_command_chroot("systemctl enable sddm")
         elif desktop_choice == '6':
             print("Installing Mate...")
-            run_command_chroot("pacman -Syu --noconfirm mate mate-extra")
-            run_command_chroot("systemctl enable lightdm")
+            run_command_chroot("pacman -Syu --noconfirm mate mate-extra gdm")
+            run_command_chroot("systemctl enable gdm")
         elif desktop_choice == '7':
             print("Installing Deepin...")
-            run_command_chroot("pacman -Syu --noconfirm deepin deepin-extra")
-            run_command_chroot("systemctl enable lightdm")
+            run_command_chroot("pacman -Syu --noconfirm deepin deepin-extra gdm")
+            run_command_chroot("systemctl enable gdm")
         else:
             print("Invalid selection. Skipping desktop environment installation.")
             return
