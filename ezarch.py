@@ -12,7 +12,7 @@ parts = {}
 
 def clear():
     os.system("clear")
-    
+    time.sleep(1)
 
 def run_command_chroot(command):
     os.system(f"arch-chroot /mnt /bin/bash -c '{command}'")
