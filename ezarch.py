@@ -408,7 +408,7 @@ def Stage13():
             run_command_chroot("systemctl enable gdm")
         elif desktop_choice == '3':
             print("Installing XFCE...")
-            run_command_chroot("pacman -Syu --noconfirm xfce4 xfce4-goodies")
+            run_command_chroot("pacman -Syu --noconfirm xfce4 xfce4-goodies lightdm")
             run_command_chroot("systemctl enable lightdm")
         elif desktop_choice == '4':
             print("Installing Cinnamon...")
