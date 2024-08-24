@@ -297,7 +297,7 @@ def Stage12():
         ucode = 'amd-ucode'
     if "intel".lower() in get_cpu_architecture():
         ucode = 'intel-ucode'
-    os.system(f"pacstrap /mnt base pacman networkmanager vim sudo bash bash-completions grub efibootmgr fastfetch {ucode} {kernel_type} linux-firmware")
+    os.system(f"pacstrap /mnt base pacman networkmanager vim sudo bash grub efibootmgr fastfetch {ucode} {kernel_type} linux-firmware")
 
 def Stage13():
     clear()
@@ -405,27 +405,27 @@ def Stage13():
         elif desktop_choice == '2':
             print("Installing GNOME...")
             run_command_chroot("pacman -Syu --noconfirm gnome gnome-extra")
-            run_command_chroot("systemctl enable gdm")
+            run_command_chroot("systemctl enable sddm")
         elif desktop_choice == '3':
             print("Installing XFCE...")
-            run_command_chroot("pacman -Syu --noconfirm xfce4 xfce4-goodies gdm")
-            run_command_chroot("systemctl enable gdm")
+            run_command_chroot("pacman -Syu --noconfirm xfce4 xfce4-goodies sddm")
+            run_command_chroot("systemctl enable sddm")
         elif desktop_choice == '4':
             print("Installing Cinnamon...")
-            run_command_chroot("pacman -Syu --noconfirm cinnamon gdm")
-            run_command_chroot("systemctl enable gdm")
+            run_command_chroot("pacman -Syu --noconfirm cinnamon sddm")
+            run_command_chroot("systemctl enable sddm")
         elif desktop_choice == '5':
             print("Installing LXQt...")
             run_command_chroot("pacman -Syu --noconfirm lxqt")
             run_command_chroot("systemctl enable sddm")
         elif desktop_choice == '6':
             print("Installing Mate...")
-            run_command_chroot("pacman -Syu --noconfirm mate mate-extra gdm")
-            run_command_chroot("systemctl enable gdm")
+            run_command_chroot("pacman -Syu --noconfirm mate mate-extra sddm")
+            run_command_chroot("systemctl enable sddm")
         elif desktop_choice == '7':
             print("Installing Deepin...")
-            run_command_chroot("pacman -Syu --noconfirm deepin deepin-extra gdm")
-            run_command_chroot("systemctl enable gdm")
+            run_command_chroot("pacman -Syu --noconfirm deepin deepin-extra sddm")
+            run_command_chroot("systemctl enable sddm")
         else:
             print("Invalid selection. Skipping desktop environment installation.")
             return
