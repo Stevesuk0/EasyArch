@@ -297,7 +297,7 @@ def Stage12():
         ucode = 'amd-ucode'
     if "intel".lower() in get_cpu_architecture():
         ucode = 'intel-ucode'
-    os.system(f"pacstrap /mnt base pacman networkmanager vim sudo zsh zsh-completions grub efibootmgr fastfetch {ucode} {kernel_type} linux-firmware")
+    os.system(f"pacstrap /mnt base pacman networkmanager vim sudo bash bash-completions grub efibootmgr fastfetch {ucode} {kernel_type} linux-firmware")
 
 def Stage13():
     clear()
@@ -364,7 +364,7 @@ def Stage13():
     create_user = input("\nWould you like to create a new user account? (yes/no): ").strip().lower()
     if create_user == 'yes':
         username = input("Enter the username for the new account: ").strip()
-        run_command_chroot(f"useradd -m -G wheel -s /bin/zsh {username}")
+        run_command_chroot(f"useradd -m -G wheel -s /bin/bash {username}")
         print(f"Setting password for the user {username}...\n")
         run_command_chroot(f"passwd {username}")
         print(f"User {username} created and password set.\n")
