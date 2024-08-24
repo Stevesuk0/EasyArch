@@ -12,6 +12,7 @@ parts = {}
 
 def clear():
     os.system("clear")
+    time.sleep(1)
     
 
 def run_command_chroot(command):
@@ -236,9 +237,10 @@ def Stage9():
     print("\nPartition mounting completed successfully.")
 
 
-def Stage10():
+def Stage10(parted=False):
     clear()
     print("Stage [10 / 13] - Setting the hostname")
+    print("\nWelcome back to the installer.")
     print("\nThe hostname serves as the network identifier. If you're installing it just for fun, you can edit anything as needed.\n")
     os.makedirs("/mnt/etc/", exist_ok=True)
     with open('/mnt/etc/hostname', "w") as f:
@@ -434,10 +436,9 @@ def end():
         print("You can manually reboot the system later by typing 'reboot'.")
 
 if os.path.exists('/parting'):
-    print("Welcome back to the installer.")
     os.remove("/parting")
     try:
-        Stage10()
+        Stage10(True)
         Stage11()
         Stage12()
         Stage13()
