@@ -72,12 +72,14 @@ def Stage1():
             print("Invalid choice, please try again.")
 
     with open("/etc/pacman.conf", 'r') as f:
-        line = f.read().split("\n")
-        for i in range(len(line)):
-            if '#ParallelDownloads = 5' in line[i]:
-                line[i] = "ParallelDownloads = 5"
+        lines = f.readlines()
+
+    for i in range(len(lines)):
+        if '#ParallelDownloads = 5' in lines[i]:
+            lines[i] = "ParallelDownloads = 5\n" 
     with open("/etc/pacman.conf", 'w') as f:
-        f.writelines(line)
+        f.writelines(lines)  
+
 
 
 
@@ -317,12 +319,12 @@ def Stage13():
     
     print("\nStep 4: Configuring bootloader...")
     with open("/mnt/etc/default/grub", 'r') as f:
-        line = f.read().split("\n")
-    for i in range(len(line)):
-        if 'GRUB_CMDLINE_LINUX_DEFAULT' in line[i]:
-            line[i] = "GRUB_CMDLINE_LINUX_DEFAULT=\"loglevel=5 ibt=off nowatchdog\""
+        lines = f.readlines()  
+    for i in range(len(lines)):
+        if 'GRUB_CMDLINE_LINUX_DEFAULT' in lines[i]:
+            lines[i] = 'GRUB_CMDLINE_LINUX_DEFAULT="loglevel=5 ibt=off nowatchdog i8042.dumbkbd"\n'
     with open("/mnt/etc/default/grub", 'w') as f:
-        f.writelines(line)
+        f.writelines(lines) 
     run_command_chroot("grub-mkconfig -o /boot/grub/grub.cfg")
 
     print("\nStep 5: Synchronizing hardware clock...")
@@ -358,12 +360,15 @@ def Stage13():
         print(f"User {username} created and password set.\n")
         print("Configuring sudoers file...")
         with open("/mnt/etc/sudoers", 'r') as f:
-            line = f.read().split("\n")
-            for i in range(len(line)):
-                if '#%wheel ALL=(ALL:ALL) ALL' in line[i]:
-                    line[i] = "%wheel ALL=(ALL:ALL) ALL"
+            lines = f.readlines()  
+
+        for i in range(len(lines)):
+            if '#%wheel ALL=(ALL:ALL) ALL' in lines[i]:
+                lines[i] = "%wheel ALL=(ALL:ALL) ALL\n" 
+
         with open("/mnt/etc/sudoers", 'w') as f:
-            f.writelines(line)
+            f.writelines(lines) 
+
         
         
         
