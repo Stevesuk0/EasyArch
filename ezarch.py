@@ -76,7 +76,7 @@ def Stage1():
 
     for i in range(len(lines)):
         if '#ParallelDownloads = 5' in lines[i]:
-            lines[i] = "ParallelDownloads = 10\n" 
+            lines[i] = "ParallelDownloads = 5\n" 
     with open("/etc/pacman.conf", 'w') as f:
         f.writelines(lines)  
 
@@ -352,7 +352,7 @@ def Stage13():
 
     for i in range(len(lines)):
         if '#ParallelDownloads = 5' in lines[i]:
-            lines[i] = "ParallelDownloads = 10\n" 
+            lines[i] = "ParallelDownloads = 5\n" 
     with open("/mnt/etc/pacman.conf", 'w') as f:
         f.writelines(lines)  
 
