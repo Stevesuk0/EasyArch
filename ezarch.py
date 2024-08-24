@@ -163,7 +163,6 @@ def get_disk():
         if choice == 'manual':
             manual_partition = True
             if input("Continue? [y/n] ") == 'y':
-                manual_partition = False
                 break
         else:
             pass
