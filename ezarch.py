@@ -4,9 +4,11 @@
 import os
 import time
 
-bootefi = False
+boot_with_uefi = False
+manual_partition = False
 kernel_type = ''
 disk = ''
+parts = {}
 
 def clear():
     time.sleep(1)
@@ -92,17 +94,17 @@ def Stage2():
             pass
 
 def Stage3():
-    global bootefi
+    global boot_with_uefi
     clear()
     print("Stage: [3 / 13] - Checking boot mode")
     print("\nThis section is checking your boot mode (UEFI or BIOS).\n")
     if os.path.exists('/sys/firmware/efi/efivars'):
         print("Boot mode: UEFI")
-        bootefi = True
+        boot_with_uefi = True
     else:
         print("Boot mode: BIOS")
-        bootefi = False
-    if not bootefi:
+        boot_with_uefi = False
+    if not boot_with_uefi:
         print("\n* Your system is not using UEFI as the boot mode. For better compatibility and features, especially with modern hardware, it's recommended to use UEFI.\n")
     else:
         print("\n* Your system is using UEFI as the boot mode. This is the recommended boot mode for modern systems, providing better compatibility, security features, and faster boot times.\n")
@@ -146,49 +148,129 @@ def Stage6():
             pass
 
 def get_disk():
+    global manual_partition
     clear()
+    print("Stage [7 / 13] - Disk Partition\n")
+    print('Type "auto" if you want to partition automatically. (This will partition the entire disk.)')
+    print('Type "manual" if you want to partition manually.\n')
+    while True:
+        choice = input(">>> ")
+        if choice == 'auto':
+            print("\n*** WARN: This will partition the entire disk ***")
+            if input("Continue? [y/n] ") == 'y':
+                manual_partition = False
+                break
+        if choice == 'manual':
+            manual_partition = True
+            if input("Continue? [y/n] ") == 'y':
+                manual_partition = False
+                break
+        else:
+            pass
+
     print("Available Disks:")
     os.system("lsblk -d -o NAME,SIZE,MODEL")
     disk = input("\nEnter the disk you want to use (e.g., sda): ")
-    return f"/dev/{disk}"
+    while True:
+        if manual_partition:
+            if input("Continue? [y/n] ") == 'y':
+                return f"/dev/{disk}"
+        else:
+            if input("Continue? [y/n] ") == 'y':
+                manual_partition = False
+                return f"/dev/{disk}"
 
 def Stage7():
     global disk
     clear()
-    print("Stage [7 / 13] - Automatic Disk Partition\n")
+    print("Stage [7 / 13] - Disk Partition\n")
     disk = get_disk()
-    os.system(f"sgdisk -n 1:0:+1G -t 1:ef00 {disk}")
-    os.system(f"sgdisk -n 2:0:-5G -t 2:8300 {disk}")
-    os.system(f"sgdisk -n 3:0:0 -t 3:8200 {disk}")
+    if manual_partition:
+        os.system(f'cfdisk {disk}')
+    else:
+        print("Automatic partition in progress...")
+        os.system(f"sgdisk -n 1:0:+1G -t 1:ef00 {disk}")
+        os.system(f"sgdisk -n 2:0:-5G -t 2:8300 {disk}")
+        os.system(f"sgdisk -n 3:0:0 -t 3:8200 {disk}")
     print("\nDisk partitioning completed.")
 
 def Stage8():
-    global disk
+    global disk, parts
     clear()
     print("Stage [8 / 13] - Format Partition")
-    print("\nAutomatic formatting in progress...\n")
-    os.system(f"mkfs.fat -F32 {disk}1")
-    os.system(f"mkfs.ext4 {disk}2")
-    os.system(f"mkswap {disk}3")
+    if manual_partition:
+        fdisk_output = os.popen(f"fdisk -l /dev/sda")
+        for i in fdisk_output.readlines():
+            if "EFI System" in i:
+                parts[i.split(" ")[0]] = "mkfs.fat -F32"
+            if "Linux filesystem" in i:
+                parts[i.split(" ")[0]] = "mkfs.ext4"
+            if "Linux swap" in i:
+                parts[i.split(" ")[0]] = "mkswap"
+
+        for i in parts:
+            os.system(f"{i} {parts[i]}")
+                
+    else:
+        print("\nAutomatic formatting in progress...\n")
+        os.system(f"mkfs.fat -F32 {disk}1")
+        os.system(f"mkfs.ext4 {disk}2")
+        os.system(f"mkswap {disk}3")
     print("\nPartition formatting completed.")
 
+
 def Stage9():
-    global disk
+    global disk, parts
     clear()
+    swap = ''
     print("Stage [9 / 13] - Mount Partition")
-    print("\nAutomatic mounting in progress...\n")
-    root_partition = f"{disk}2"
-    boot_partition = f"{disk}1"
-    swap_partition = f"{disk}3"
-    print(f"Mounting {root_partition} to /mnt...")
-    os.system(f"mount {root_partition} /mnt")
-    os.makedirs("/mnt/boot", exist_ok=True)
-    print(f"Mounting {boot_partition} to /mnt/boot...")
-    os.system(f"mount {boot_partition} /mnt/boot")
-    os.system(f"swapon {swap_partition}")
-    print("\nMounted partitions:")
+    
+    for i in parts:
+        if parts[i] == 'mkswap':
+            swap = i
+            del parts[i]
+        else:
+            parts[i] = '0'
+
+    if manual_partition:
+        print("\nAvailable partitions:")
+        os.system("lsblk -o NAME,SIZE")
+
+        while True:
+            print("\nSelect a partition to set its mount point (e.g., /dev/sda1).")
+            print('When you\'re ready, type "apply" to continue.')
+            select = input(">>> ")
+            if select == "apply":
+                print("\nApplying mount points...")
+                os.system(f"swapon {swap}")
+                for part, mount_point in parts.items():
+                    if mount_point != '0':
+                        os.system(f"mount {part} {mount_point}")
+                        print(f"Mounted {part} to {mount_point}")
+                
+                print("\nPartition mounting completed.")
+                break
+            elif parts.get(select) is None:
+                print("Partition not found on disk.")
+            else:
+                print("Enter a path to set as the mount point (e.g., /):")
+                mount = input(">>> ")
+                parts[select] = mount
+    else:
+        print("\nAutomatic mounting in progress...\n")
+        root_partition = f"{disk}2"
+        boot_partition = f"{disk}1"
+        swap_partition = f"{disk}3"
+        print(f"Mounting {root_partition} to /mnt...")
+        os.system(f"mount {root_partition} /mnt")
+        os.makedirs("/mnt/boot", exist_ok=True)
+        print(f"Mounting {boot_partition} to /mnt/boot...")
+        os.system(f"mount {boot_partition} /mnt/boot")
+        os.system(f"swapon {swap_partition}")
+        print("\nPartitions mounted successfully:")
     os.system("lsblk -o NAME,MOUNTPOINT,SIZE,FSTYPE,LABEL,UUID")
-    print("\nPartition mount completed successfully.")
+    print("\nPartition mounting completed successfully.")
+
 
 def Stage10():
     clear()
