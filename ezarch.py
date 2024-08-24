@@ -344,7 +344,7 @@ def Stage13():
         f.write(mirrorlist)
 
     print("\nStep 8: Enable networking...")
-    run_command_chroot("systemctl start NetworkManager")
+    run_command_chroot("systemctl enable NetworkManager")
 
     print("\nStep 9: Enable pacman mulit-connection...")
     with open("/mnt/etc/pacman.conf", 'r') as f:
@@ -373,7 +373,7 @@ def Stage13():
             lines = f.readlines()  
 
         for i in range(len(lines)):
-            if '#%wheel ALL=(ALL:ALL) ALL' in lines[i]:
+            if '# %wheel ALL=(ALL:ALL) ALL' in lines[i]:
                 lines[i] = "%wheel ALL=(ALL:ALL) ALL\n" 
 
         with open("/mnt/etc/sudoers", 'w') as f:
