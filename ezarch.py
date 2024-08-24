@@ -12,7 +12,7 @@ parts = {}
 
 def clear():
     os.system("clear")
-    time.sleep(1)
+    
 
 def run_command_chroot(command):
     os.system(f"arch-chroot /mnt /bin/bash -c '{command}'")
@@ -162,7 +162,7 @@ def get_disk():
         if choice == 'manual':
             manual_partition = True
             if input("Continue? [y/n] ") == 'y':
-                break
+                return ''
         else:
             pass
 
@@ -170,12 +170,9 @@ def get_disk():
     os.system("lsblk -d -o NAME,SIZE,MODEL")
     disk = input("\nEnter the disk you want to use (e.g., sda): ")
     while True:
-        if manual_partition:
-            return ''
-        else:
-            if input("Continue? [y/n] ") == 'y':
-                manual_partition = False
-                return f"/dev/{disk}"
+        if input("Continue? [y/n] ") == 'y':
+            manual_partition = False
+            return f"/dev/{disk}"
 
 def Stage7():
     global disk
